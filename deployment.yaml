@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: adk-agent
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: adk-agent
+  template:
+    metadata:
+      labels:
+        app: adk-agent
+    spec:
+      serviceAccount: adk-agent-sa
+      containers:
+      - name: adk-agent
+        image: us-central1-docker.pkg.dev/pso-db-migrations/adk-repo/adk-agent:latest
+        imagePullPolicy: Always
+        resources:
+          limits:
+            memory: "1280Mi"
+            cpu: "4000m"
+            ephemeral-storage: "1280Mi"
+          requests:
+            memory: "1280Mi"
+            cpu: "2000m"
+            ephemeral-storage: "1280Mi"
+        ports:
+        - containerPort: 8080
+        env:
+          - name: PORT
+            value: "8080"
+          - name: GOOGLE_CLOUD_PROJECT
+            value: GOOGLE_CLOUD_PROJECT
+          - name: GOOGLE_CLOUD_LOCATION
+            value: GOOGLE_CLOUD_LOCATION
+          - name: GOOGLE_GENAI_USE_VERTEXAI
+            value: GOOGLE_GENAI_USE_VERTEXAI
+          # Add any other necessary environ          # Addyour agent might need
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: adk-agent
+  annotations:
+    cloud.google.com/load-balancer-type: "Internal"
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 80
+      targetPort: 8080
+  selector:
+    app: adk-agent
