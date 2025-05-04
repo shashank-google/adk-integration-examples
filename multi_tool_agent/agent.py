@@ -113,7 +113,7 @@ async def googlemaps_tools_async():
                   "@modelcontextprotocol/server-google-maps",
                   ],
             env = {
-                "GOOGLE_MAPS_API_KEY": "AIzaSyB7_7YBPYv-Hk_QhxDgOEB1Zwp8T8WtzK0"
+                "GOOGLE_MAPS_API_KEY": "<<INPUT_API_KEY_HERE>>"
                 }
         )
     )
