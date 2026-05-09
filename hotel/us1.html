@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lumina Hotel & Spa</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#1e3a8a', // blue-900
+                        secondary: '#d97706', // amber-600
+                        accent: '#fde68a', // amber-200
+                        dark: '#1f2937', // gray-800
+                        light: '#f9fafb', // gray-50
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            color: #374151; /* gray-700 */
+            background-color: #f9fafb;
+        }
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Playfair Display', serif;
+        }
+        .hero-bg {
+            background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('https://images.unsplash.com/photo-1542314831-c53cd3816002?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+        .room-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .room-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        .gallery-img {
+            transition: transform 0.5s ease;
+        }
+        .gallery-item:hover .gallery-img {
+            transform: scale(1.05);
+        }
+        
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.9);
+            backdrop-filter: blur(5px);
+        }
+        .modal-content {
+            margin: auto;
+            display: block;
+            max-width: 90%;
+            max-height: 90vh;
+            margin-top: 5vh;
+            border-radius: 8px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            animation: zoomIn 0.3s ease;
+        }
+        @keyframes zoomIn {
+            from {transform:scale(0.9); opacity:0;}
+            to {transform:scale(1); opacity:1;}
+        }
+        .close {
+            position: absolute;
+            top: 15px;
+            right: 35px;
+            color: #f1f1f1;
+            font-size: 40px;
+            font-weight: bold;
+            transition: 0.3s;
+            cursor: pointer;
+        }
+        .close:hover,
+        .close:focus {
+            color: #bbb;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        
+        /* Mobile menu transition */
+        #mobile-menu {
+            transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+        }
+        #mobile-menu.open {
+            max-height: 400px;
+            opacity: 1;
+        }
+
+        /* Message Box styling */
+        #message-box {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 2000;
+            background: white;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            text-align: center;
+            max-width: 90vw;
+            width: 400px;
+        }
+        #message-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1999;
+            backdrop-filter: blur(2px);
+        }
+    </style>
+</head>
+<body class="antialiased text-gray-800">
+
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 transition-all duration-300" id="navbar">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <!-- Logo -->
+                <div class="flex-shrink-0 flex items-center">
+                    <a href="#" class="text-2xl font-serif font-bold text-white tracking-wider flex items-center gap-2">
+                        <i class="fa-solid fa-hotel text-secondary"></i>
+                        LUMINA
+                    </a>
+                </div>
+                
+                <!-- Desktop Menu -->
+                <div class="hidden md:flex space-x-8 items-center">
+                    <a href="#about" class="text-white hover:text-secondary px-3 py-2 text-sm font-medium transition-colors">About</a>
+                    <a href="#rooms" class="text-white hover:text-secondary px-3 py-2 text-sm font-medium transition-colors">Rooms & Suites</a>
+                    <a href="#amenities" class="text-white hover:text-secondary px-3 py-2 text-sm font-medium transition-colors">Amenities</a>
+                    <a href="#gallery" class="text-white hover:text-secondary px-3 py-2 text-sm font-medium transition-colors">Gallery</a>
+                    <button onclick="showMessage('Booking system is currently undergoing maintenance. Please check back later.')" class="bg-secondary hover:bg-amber-700 text-white px-6 py-2 rounded-full text-sm font-medium transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+                        Book Now
+                    </button>
+                </div>
+
+                <!-- Mobile Menu Button -->
+                <div class="md:hidden flex items-center">
+                    <button id="mobile-menu-btn" class="text-white hover:text-secondary focus:outline-none p-2">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Menu Panel -->
+        <div id="mobile-menu" class="md:hidden bg-white shadow-xl absolute w-full">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <a href="#about" class="mobile-link block px-3 py-2 text-base font-medium text-gray-800 hover:text-secondary hover:bg-gray-50 rounded-md">About</a>
+                <a href="#rooms" class="mobile-link block px-3 py-2 text-base font-medium text-gray-800 hover:text-secondary hover:bg-gray-50 rounded-md">Rooms & Suites</a>
+                <a href="#amenities" class="mobile-link block px-3 py-2 text-base font-medium text-gray-800 hover:text-secondary hover:bg-gray-50 rounded-md">Amenities</a>
+                <a href="#gallery" class="mobile-link block px-3 py-2 text-base font-medium text-gray-800 hover:text-secondary hover:bg-gray-50 rounded-md">Gallery</a>
+                <button onclick="showMessage('Booking system is currently undergoing maintenance. Please check back later.')" class="w-full text-left block px-3 py-2 text-base font-medium text-secondary hover:text-amber-700 hover:bg-gray-50 rounded-md">
+                    Book Now
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="hero-bg relative h-screen flex items-center justify-center">
+        <div class="text-center z-10 px-4 mt-16">
+            <h1 class="text-5xl md:text-7xl text-white font-bold mb-6 drop-shadow-lg tracking-tight">
+                Experience True <span class="text-accent italic">Luxury</span>
+            </h1>
+            <p class="text-lg md:text-2xl text-gray-200 mb-10 max-w-2xl mx-auto drop-shadow-md font-light">
+                Escape to a world of unparalleled elegance and breathtaking views in the heart of the city.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="#rooms" class="bg-secondary hover:bg-amber-700 text-white px-8 py-4 rounded-full text-lg font-medium transition-all shadow-xl hover:shadow-2xl">
+                    Discover Our Rooms
+                </a>
+                <a href="#gallery" class="bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/30 text-white px-8 py-4 rounded-full text-lg font-medium transition-all">
+                    View Gallery
+                </a>
+            </div>
+        </div>
+        
+        <!-- Scroll indicator -->
+        <div class="absolute bottom-10 left-1/2 transform -translate-x-1/2 animate-bounce">
+            <a href="#about" class="text-white opacity-70 hover:opacity-100 transition-opacity">
+                <i class="fa-solid fa-chevron-down text-3xl"></i>
+            </a>
+        </div>
+    </header>
+
+    <!-- Booking Widget (Floating) -->
+    <div class="relative -mt-16 z-20 max-w-5xl mx-auto px-4 hidden md:block">
+        <div class="bg-white rounded-xl shadow-2xl p-6 border border-gray-100">
+            <form class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end" onsubmit="event.preventDefault(); showMessage('Searching for availability...');">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Check-in</label>
+                    <input type="date" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-secondary focus:border-secondary p-2 border">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Check-out</label>
+                    <input type="date" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-secondary focus:border-secondary p-2 border">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Guests</label>
+                    <select class="w-full border-gray-300 rounded-md shadow-sm focus:ring-secondary focus:border-secondary p-2 border">
+                        <option>1 Adult</option>
+                        <option selected>2 Adults</option>
+                        <option>2 Adults, 1 Child</option>
+                        <option>2 Adults, 2 Children</option>
+                    </select>
+                </div>
+                <div>
+                    <button type="submit" class="w-full bg-primary hover:bg-blue-800 text-white px-4 py-2 rounded-md font-medium transition-colors h-[42px]">
+                        Check Availability
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- About Section -->
+    <section id="about" class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col lg:flex-row items-center gap-16">
+                <div class="lg:w-1/2 relative">
+                    <img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Hotel Exterior" class="rounded-lg shadow-xl w-full object-cover h-[500px]">
+                    <div class="absolute -bottom-8 -right-8 bg-white p-6 rounded-lg shadow-xl hidden md:block">
+                        <div class="flex items-center gap-4">
+                            <div class="text-secondary text-4xl"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></div>
+                        </div>
+                        <p class="font-serif text-lg mt-2 text-dark">5-Star Luxury Rating</p>
+                    </div>
+                </div>
+                <div class="lg:w-1/2">
+                    <span class="text-secondary font-medium tracking-wider uppercase text-sm mb-2 block">Welcome to Lumina</span>
+                    <h2 class="text-4xl md:text-5xl font-bold mb-6 text-dark leading-tight">A Sanctuary of <br>Refined Elegance</h2>
+                    <p class="text-gray-600 mb-6 leading-relaxed">
+                        Since 1995, Lumina Hotel & Spa has defined luxury hospitality. Nestled in a prime location, we offer an oasis of calm amidst the bustling city. Our commitment to impeccable service and exquisite design ensures an unforgettable stay.
+                    </p>
+                    <p class="text-gray-600 mb-8 leading-relaxed">
+                        Whether you are here for business, a romantic getaway, or a family vacation, our world-class amenities, Michelin-starred dining, and serene spa await to cater to your every need.
+                    </p>
+                    <div class="grid grid-cols-2 gap-6 mb-8">
+                        <div class="flex items-start gap-3">
+                            <div class="bg-blue-50 p-3 rounded-full text-primary">
+                                <i class="fa-solid fa-concierge-bell"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-dark">24/7 Service</h4>
+                                <p class="text-sm text-gray-500">Always at your disposal</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <div class="bg-blue-50 p-3 rounded-full text-primary">
+                                <i class="fa-solid fa-location-dot"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-dark">Prime Location</h4>
+                                <p class="text-sm text-gray-500">Heart of the city</p>
+                            </div>
+                        </div>
+                    </div>
+                    <button onclick="showMessage('Learn more page is under construction.')" class="text-primary font-medium hover:text-secondary transition-colors flex items-center gap-2 group">
+                        Discover Our Story 
+                        <i class="fa-solid fa-arrow-right transform group-hover:translate-x-1 transition-transform"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Rooms Section -->
+    <section id="rooms" class="py-24 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <span class="text-secondary font-medium tracking-wider uppercase text-sm mb-2 block">Accommodations</span>
+                <h2 class="text-4xl md:text-5xl font-bold text-dark">Rooms & Suites</h2>
+                <div class="w-24 h-1 bg-secondary mx-auto mt-6 rounded-full"></div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+                <!-- Room 1 -->
+                <div class="bg-white rounded-xl overflow-hidden room-card border border-gray-100 flex flex-col">
+                    <div class="relative h-64 overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1611892440504-42a792e24d32?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Deluxe Room" class="w-full h-full object-cover transition-transform duration-700 hover:scale-110">
+                        <div class="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-sm font-semibold text-dark shadow-sm">
+                            From $250/night
+                        </div>
+                    </div>
+                    <div class="p-6 flex-grow flex flex-col">
+                        <h3 class="text-2xl font-bold mb-2 text-dark">Deluxe City View</h3>
+                        <p class="text-gray-600 mb-4 text-sm flex-grow">Spacious room with modern amenities, king-size bed, and stunning views of the city skyline.</p>
+                        <div class="flex items-center gap-4 mb-6 text-gray-500 text-sm border-t border-b border-gray-100 py-3">
+                            <span title="Size"><i class="fa-solid fa-vector-square mr-1"></i> 35m²</span>
+                            <span title="Capacity"><i class="fa-solid fa-user mr-1"></i> 2 Guests</span>
+                            <span title="Bed"><i class="fa-solid fa-bed mr-1"></i> 1 King</span>
+                        </div>
+                        <button onclick="showMessage('Booking initiated for Deluxe City View.')" class="w-full bg-transparent border-2 border-primary text-primary hover:bg-primary hover:text-white px-4 py-2 rounded-md font-medium transition-colors">
+                            Book Room
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Room 2 -->
+                <div class="bg-white rounded-xl overflow-hidden room-card border border-gray-100 flex flex-col shadow-lg relative">
+                    <!-- Recommended Badge -->
+                    <div class="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10">
+                        <span class="bg-secondary text-white text-xs font-bold uppercase tracking-wider py-1 px-3 rounded-full shadow-md">Most Popular</span>
+                    </div>
+                    <div class="relative h-64 overflow-hidden mt-2">
+                        <img src="https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Executive Suite" class="w-full h-full object-cover transition-transform duration-700 hover:scale-110">
+                        <div class="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-sm font-semibold text-dark shadow-sm">
+                            From $450/night
+                        </div>
+                    </div>
+                    <div class="p-6 flex-grow flex flex-col">
+                        <h3 class="text-2xl font-bold mb-2 text-dark">Executive Suite</h3>
+                        <p class="text-gray-600 mb-4 text-sm flex-grow">Elegant suite featuring a separate living area, marble bathroom with a soaking tub, and exclusive lounge access.</p>
+                        <div class="flex items-center gap-4 mb-6 text-gray-500 text-sm border-t border-b border-gray-100 py-3">
+                            <span title="Size"><i class="fa-solid fa-vector-square mr-1"></i> 65m²</span>
+                            <span title="Capacity"><i class="fa-solid fa-user mr-1"></i> 3 Guests</span>
+                            <span title="Bed"><i class="fa-solid fa-bed mr-1"></i> 1 King + Sofa</span>
+                        </div>
+                        <button onclick="showMessage('Booking initiated for Executive Suite.')" class="w-full bg-primary text-white hover:bg-blue-800 px-4 py-2 rounded-md font-medium transition-colors shadow-md">
+                            Book Suite
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Room 3 -->
+                <div class="bg-white rounded-xl overflow-hidden room-card border border-gray-100 flex flex-col">
+                    <div class="relative h-64 overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1631049307264-da0ec9d70304?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Presidential Suite" class="w-full h-full object-cover transition-transform duration-700 hover:scale-110">
+                        <div class="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-sm font-semibold text-dark shadow-sm">
+                            From $1200/night
+                        </div>
+                    </div>
+                    <div class="p-6 flex-grow flex flex-col">
+                        <h3 class="text-2xl font-bold mb-2 text-dark">Presidential Villa</h3>
+                        <p class="text-gray-600 mb-4 text-sm flex-grow">The ultimate luxury experience. Features a private terrace, plunge pool, dining room, and personalized butler service.</p>
+                        <div class="flex items-center gap-4 mb-6 text-gray-500 text-sm border-t border-b border-gray-100 py-3">
+                            <span title="Size"><i class="fa-solid fa-vector-square mr-1"></i> 150m²</span>
+                            <span title="Capacity"><i class="fa-solid fa-user mr-1"></i> 4 Guests</span>
+                            <span title="Bed"><i class="fa-solid fa-bed mr-1"></i> 2 King</span>
+                        </div>
+                        <button onclick="showMessage('Booking initiated for Presidential Villa.')" class="w-full bg-transparent border-2 border-primary text-primary hover:bg-primary hover:text-white px-4 py-2 rounded-md font-medium transition-colors">
+                            Book Villa
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-center mt-12">
+                <button onclick="showMessage('Loading more room types...')" class="text-dark font-medium border-b-2 border-secondary pb-1 hover:text-secondary transition-colors inline-flex items-center gap-2">
+                    View All Room Categories <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Amenities Section -->
+    <section id="amenities" class="py-24 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col lg:flex-row gap-12 items-center">
+                <div class="lg:w-1/3">
+                    <span class="text-secondary font-medium tracking-wider uppercase text-sm mb-2 block">Exceptional Services</span>
+                    <h2 class="text-4xl md:text-5xl font-bold mb-6 text-dark">Hotel Amenities</h2>
+                    <p class="text-gray-600 mb-8 leading-relaxed">
+                        Immerse yourself in a world of comfort and convenience. Our state-of-the-art facilities are designed to elevate your stay, whether you seek relaxation, recreation, or gastronomic delights.
+                    </p>
+                    <button onclick="showMessage('Downloading amenities brochure...')" class="bg-gray-100 hover:bg-gray-200 text-dark px-6 py-3 rounded-md font-medium transition-colors inline-flex items-center gap-2">
+                        <i class="fa-solid fa-download"></i> Download Brochure
+                    </button>
+                </div>
+                
+                <div class="lg:w-2/3 grid grid-cols-1 sm:grid-cols-2 gap-8">
+                    <!-- Amenity 1 -->
+                    <div class="flex gap-4 p-6 rounded-xl hover:bg-gray-50 transition-colors border border-transparent hover:border-gray-100">
+                        <div class="flex-shrink-0 w-14 h-14 bg-blue-50 text-primary rounded-lg flex items-center justify-center text-2xl">
+                            <i class="fa-solid fa-spa"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold mb-2 text-dark">Serenity Spa</h3>
+                            <p class="text-gray-500 text-sm leading-relaxed">Rejuvenate your body and mind with our holistic treatments, massages, and sauna facilities.</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Amenity 2 -->
+                    <div class="flex gap-4 p-6 rounded-xl hover:bg-gray-50 transition-colors border border-transparent hover:border-gray-100">
+                        <div class="flex-shrink-0 w-14 h-14 bg-amber-50 text-secondary rounded-lg flex items-center justify-center text-2xl">
+                            <i class="fa-solid fa-utensils"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold mb-2 text-dark">Fine Dining</h3>
+                            <p class="text-gray-500 text-sm leading-relaxed">Experience culinary excellence at our Michelin-starred restaurant featuring local and international cuisine.</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Amenity 3 -->
+                    <div class="flex gap-4 p-6 rounded-xl hover:bg-gray-50 transition-colors border border-transparent hover:border-gray-100">
+                        <div class="flex-shrink-0 w-14 h-14 bg-blue-50 text-primary rounded-lg flex items-center justify-center text-2xl">
+                            <i class="fa-solid fa-water-ladder"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold mb-2 text-dark">Infinity Pool</h3>
+                            <p class="text-gray-500 text-sm leading-relaxed">Swim with a view in our temperature-controlled rooftop infinity pool overlooking the city.</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Amenity 4 -->
+                    <div class="flex gap-4 p-6 rounded-xl hover:bg-gray-50 transition-colors border border-transparent hover:border-gray-100">
+                        <div class="flex-shrink-0 w-14 h-14 bg-amber-50 text-secondary rounded-lg flex items-center justify-center text-2xl">
+                            <i class="fa-solid fa-dumbbell"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold mb-2 text-dark">Fitness Center</h3>
+                            <p class="text-gray-500 text-sm leading-relaxed">Maintain your routine in our 24/7 gym equipped with the latest cardio and weight training gear.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Gallery Section -->
+    <section id="gallery" class="py-24 bg-gray-900 text-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <span class="text-secondary font-medium tracking-wider uppercase text-sm mb-2 block">Visual Tour</span>
+                <h2 class="text-4xl md:text-5xl font-bold text-white">Photo Gallery</h2>
+                <div class="w-24 h-1 bg-secondary mx-auto mt-6 rounded-full"></div>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                <!-- Gallery Item 1 -->
+                <div class="gallery-item relative overflow-hidden rounded-lg aspect-square cursor-pointer group" onclick="openModal('https://images.unsplash.com/photo-1542314831-c53cd3816002?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80')">
+                    <img src="https://images.unsplash.com/photo-1542314831-c53cd3816002?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Hotel Exterior Night" class="gallery-img w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <i class="fa-solid fa-magnifying-glass-plus text-3xl text-white"></i>
+                    </div>
+                </div>
+                <!-- Gallery Item 2 -->
+                <div class="gallery-item relative overflow-hidden rounded-lg aspect-square cursor-pointer group" onclick="openModal('https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80')">
+                    <img src="https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Hotel Lobby" class="gallery-img w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <i class="fa-solid fa-magnifying-glass-plus text-3xl text-white"></i>
+                    </div>
+                </div>
+                <!-- Gallery Item 3 -->
+                <div class="gallery-item relative overflow-hidden rounded-lg aspect-square cursor-pointer group md:col-span-2 md:row-span-2" onclick="openModal('https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80')">
+                    <img src="https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Resort Pool" class="gallery-img w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <i class="fa-solid fa-magnifying-glass-plus text-3xl text-white"></i>
+                    </div>
+                </div>
+                <!-- Gallery Item 4 -->
+                <div class="gallery-item relative overflow-hidden rounded-lg aspect-square cursor-pointer group" onclick="openModal('https://images.unsplash.com/photo-1514933651103-005eec06c04b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80')">
+                    <img src="https://images.unsplash.com/photo-1514933651103-005eec06c04b?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Restaurant Bar" class="gallery-img w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <i class="fa-solid fa-magnifying-glass-plus text-3xl text-white"></i>
+                    </div>
+                </div>
+                <!-- Gallery Item 5 -->
+                <div class="gallery-item relative overflow-hidden rounded-lg aspect-square cursor-pointer group" onclick="openModal('https://images.unsplash.com/photo-1560066984-138dadb4c035?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80')">
+                    <img src="https://images.unsplash.com/photo-1560066984-138dadb4c035?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Spa Treatment" class="gallery-img w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <i class="fa-solid fa-magnifying-glass-plus text-3xl text-white"></i>
+                    </div>
+                </div>
+                <!-- Gallery Item 6 -->
+                <div class="gallery-item relative overflow-hidden rounded-lg aspect-square cursor-pointer group" onclick="openModal('https://images.unsplash.com/photo-1414235077428-338989a2e8c0?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80')">
+                    <img src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Fine Dining Food" class="gallery-img w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <i class="fa-solid fa-magnifying-glass-plus text-3xl text-white"></i>
+                    </div>
+                </div>
+                 <!-- Gallery Item 7 -->
+                 <div class="gallery-item relative overflow-hidden rounded-lg aspect-square cursor-pointer group" onclick="openModal('https://images.unsplash.com/photo-1595576508898-0ad5c879a061?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80')">
+                    <img src="https://images.unsplash.com/photo-1595576508898-0ad5c879a061?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Bathroom" class="gallery-img w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <i class="fa-solid fa-magnifying-glass-plus text-3xl text-white"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Image Modal -->
+            <div id="imageModal" class="modal" onclick="if(event.target == this) closeModal()">
+                <span class="close" onclick="closeModal()">&times;</span>
+                <img class="modal-content" id="modalImg" alt="Enlarged gallery image">
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-gray-300 pt-16 pb-8 border-t border-gray-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
+                <!-- Brand -->
+                <div>
+                    <a href="#" class="text-2xl font-serif font-bold text-white tracking-wider flex items-center gap-2 mb-6">
+                        <i class="fa-solid fa-hotel text-secondary"></i>
+                        LUMINA
+                    </a>
+                    <p class="text-sm mb-6 leading-relaxed">
+                        Experience the pinnacle of luxury hospitality. Where every detail is crafted to ensure an unforgettable stay.
+                    </p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-primary hover:text-white transition-colors">
+                            <i class="fa-brands fa-facebook-f"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-blue-400 hover:text-white transition-colors">
+                            <i class="fa-brands fa-twitter"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-pink-600 hover:text-white transition-colors">
+                            <i class="fa-brands fa-instagram"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Quick Links -->
+                <div>
+                    <h4 class="text-white font-bold mb-6 font-serif text-lg">Quick Links</h4>
+                    <ul class="space-y-3 text-sm">
+                        <li><a href="#about" class="hover:text-secondary transition-colors">About Us</a></li>
+                        <li><a href="#rooms" class="hover:text-secondary transition-colors">Rooms & Suites</a></li>
+                        <li><a href="#amenities" class="hover:text-secondary transition-colors">Spa & Wellness</a></li>
+                        <li><a href="#amenities" class="hover:text-secondary transition-colors">Dining Options</a></li>
+                        <li><a href="#gallery" class="hover:text-secondary transition-colors">Photo Gallery</a></li>
+                    </ul>
+                </div>
+
+                <!-- Contact Info -->
+                <div>
+                    <h4 class="text-white font-bold mb-6 font-serif text-lg">Contact Us</h4>
+                    <ul class="space-y-4 text-sm">
+                        <li class="flex items-start gap-3">
+                            <i class="fa-solid fa-location-dot mt-1 text-secondary"></i>
+                            <span>3816 219th PL SE,<br>Bothell WA. 98021</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <i class="fa-solid fa-phone text-secondary"></i>
+                            <span>+1 (555) 123-4567</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <i class="fa-solid fa-envelope text-secondary"></i>
+                            <span>reservations@luminahotel.com</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Newsletter -->
+                <div>
+                    <h4 class="text-white font-bold mb-6 font-serif text-lg">Newsletter</h4>
+                    <p class="text-sm mb-4">Subscribe to receive exclusive offers and updates.</p>
+                    <form class="flex flex-col gap-2" onsubmit="event.preventDefault(); showMessage('Thank you for subscribing to our newsletter!');">
+                        <input type="email" placeholder="Your Email Address" required class="bg-gray-800 border border-gray-700 text-white px-4 py-2 rounded-md focus:outline-none focus:border-secondary w-full">
+                        <button type="submit" class="bg-secondary hover:bg-amber-700 text-white px-4 py-2 rounded-md transition-colors font-medium">
+                            Subscribe
+                        </button>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center text-sm text-gray-500">
+                <p>&copy; 2026 Lumina Hotel & Spa. All rights reserved.</p>
+                <div class="flex space-x-4 mt-4 md:mt-0">
+                    <a href="#" class="hover:text-white transition-colors">Privacy Policy</a>
+                    <a href="#" class="hover:text-white transition-colors">Terms of Service</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Custom Message Box -->
+    <div id="message-overlay"></div>
+    <div id="message-box">
+        <div class="text-4xl text-secondary mb-4">
+            <i class="fa-solid fa-circle-info"></i>
+        </div>
+        <h3 class="text-xl font-bold mb-2 text-dark font-serif" id="message-title">Information</h3>
+        <p class="text-gray-600 mb-6" id="message-text">Message goes here.</p>
+        <button onclick="closeMessage()" class="bg-primary hover:bg-blue-800 text-white px-6 py-2 rounded-md font-medium transition-colors w-full">
+            Close
+        </button>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        // Navbar scroll effect
+        const navbar = document.getElementById('navbar');
+        
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                navbar.classList.add('bg-white', 'shadow-md', 'py-0');
+                navbar.classList.remove('py-2');
+                // Change text colors for light background
+                document.querySelectorAll('#navbar a.text-white').forEach(el => {
+                    el.classList.remove('text-white');
+                    el.classList.add('text-dark');
+                });
+                document.querySelector('#navbar .fa-hotel').classList.remove('text-secondary');
+                document.querySelector('#navbar .fa-hotel').classList.add('text-primary');
+                document.querySelector('#navbar .font-serif').classList.remove('text-white');
+                document.querySelector('#navbar .font-serif').classList.add('text-dark');
+                document.getElementById('mobile-menu-btn').classList.remove('text-white');
+                document.getElementById('mobile-menu-btn').classList.add('text-dark');
+            } else {
+                navbar.classList.remove('bg-white', 'shadow-md', 'py-0');
+                navbar.classList.add('py-2');
+                // Revert text colors
+                document.querySelectorAll('#navbar a.text-dark').forEach(el => {
+                    if(!el.classList.contains('mobile-link')){
+                        el.classList.remove('text-dark');
+                        el.classList.add('text-white');
+                    }
+                });
+                document.querySelector('#navbar .fa-hotel').classList.add('text-secondary');
+                document.querySelector('#navbar .fa-hotel').classList.remove('text-primary');
+                document.querySelector('#navbar .font-serif').classList.add('text-white');
+                document.querySelector('#navbar .font-serif').classList.remove('text-dark');
+                document.getElementById('mobile-menu-btn').classList.add('text-white');
+                document.getElementById('mobile-menu-btn').classList.remove('text-dark');
+            }
+        });
+
+        // Mobile Menu Toggle
+        const mobileBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const mobileLinks = document.querySelectorAll('.mobile-link');
+
+        mobileBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('open');
+        });
+
+        // Close mobile menu when clicking a link
+        mobileLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                mobileMenu.classList.remove('open');
+            });
+        });
+
+        // Modal Logic for Gallery
+        const modal = document.getElementById("imageModal");
+        const modalImg = document.getElementById("modalImg");
+
+        function openModal(imgSrc) {
+            modal.style.display = "block";
+            modalImg.src = imgSrc;
+            document.body.style.overflow = "hidden"; // Prevent scrolling
+        }
+
+        function closeModal() {
+            modal.style.display = "none";
+            document.body.style.overflow = "auto"; // Re-enable scrolling
+        }
+        
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === "Escape" && modal.style.display === "block") {
+                closeModal();
+            }
+        });
+
+        // Custom Message Box Functionality (Replacing alert)
+        const messageOverlay = document.getElementById('message-overlay');
+        const messageBox = document.getElementById('message-box');
+        const messageText = document.getElementById('message-text');
+
+        function showMessage(text, title = 'Notice') {
+            document.getElementById('message-title').innerText = title;
+            messageText.innerText = text;
+            messageOverlay.style.display = 'block';
+            messageBox.style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeMessage() {
+            messageOverlay.style.display = 'none';
+            messageBox.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+        
+        // Prevent default form submissions on the page that don't have explicit handlers
+        document.querySelectorAll('a[href="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+            });
+        });
+    </script>
+</body>
+</html>
